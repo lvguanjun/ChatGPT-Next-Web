@@ -106,19 +106,21 @@ export const DEFAULT_CONFIG: AppConfig = {
   customModels: "",
   models: DEFAULT_MODELS as any as LLMModel[],
   modelConfig: {
-    model: "gpt-4o-mini" as ModelType,
+    // To be honest, I don't understand why the setup of environment variables
+    // for a default model can't be implemented across so many versions.
+    model: "gpt-4o" as ModelType,
     providerName: "OpenAI" as ServiceProvider,
     temperature: 0.5,
     top_p: 1,
-    max_tokens: 4000,
+    max_tokens: 32767, // I don't even know how much 2^15 is, I must be a terrible programmer. :(
     presence_penalty: 0,
     frequency_penalty: 0,
-    sendMemory: true,
-    historyMessageCount: 4,
+    sendMemory: false,
+    historyMessageCount: 64,
     compressMessageLengthThreshold: 1000,
     compressModel: "",
     compressProviderName: "",
-    enableInjectSystemPrompts: true,
+    enableInjectSystemPrompts: false,
     template: config?.template ?? DEFAULT_INPUT_TEMPLATE,
     size: "1024x1024" as DalleSize,
     quality: "standard" as DalleQuality,
