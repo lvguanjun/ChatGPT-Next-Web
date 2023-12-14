@@ -9,6 +9,8 @@ jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
+    env:
+      SHORT_SHA: ${{ github.sha }}
     steps:
       -
         name: Check out the repo
@@ -25,9 +27,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: tianzhentech/chatgpt-next-web
+          images: 301redirect/chatgpt-next-web
           tags: |
             type=raw,value=latest
+            type=raw,value=${{ env.SHORT_SHA }}
             type=ref,event=tag
       
       - 
