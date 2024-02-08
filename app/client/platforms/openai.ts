@@ -212,7 +212,7 @@ export class ChatGPTApi implements LLMApi {
 
                   // 创建消息元素
                   const msg = document.createElement('p');
-                  msg.innerHTML = `您的请求被 Cloudflare 阻止了。请刷新页面后重试请求。更多帮助信息请查看<a href="${helpUrl}" target="_blank">帮助页面</a>。`;
+                  msg.innerHTML = `您的请求被 Cloudflare 阻止了。请<strong>刷新页面</strong>后<strong>重试请求</strong>。更多帮助信息请查看<a href="${helpUrl}" target="_blank">帮助页面</a>。`;
                   innerDiv.appendChild(msg);
 
                   // 创建关闭按钮
