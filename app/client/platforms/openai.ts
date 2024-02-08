@@ -187,8 +187,7 @@ export class ChatGPTApi implements LLMApi {
                 if (responseText.includes('Just a moment...')) {
                   // 在用户界面上显示一个带有链接的提示
                   const helpUrl = 'https://help.3211000.xyz/refresh';
-                  const message = `您的请求被 Cloudflare 阻止了。请刷新页面后重试。更多帮助信息请查看<a href="${helpUrl}" target="_blank">帮助页面</a>。`;
-                  alert(message);
+                  alert(`您的请求被 Cloudflare 阻止了。请刷新页面后重试请求。更多帮助信息请查看帮助页面：${helpUrl}`);
                 }
                 return;
               }
