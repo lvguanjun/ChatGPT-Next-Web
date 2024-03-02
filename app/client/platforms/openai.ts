@@ -232,8 +232,9 @@ export class ChatGPTApi implements LLMApi {
 
                   outerDiv.appendChild(innerDiv);
                   document.body.appendChild(outerDiv);
+
+                  return; // Prevent calling finish() when cf challenge
                 }
-                return; // Prevent calling finish() when status is 403
               }
 
               if (extraInfo) {
