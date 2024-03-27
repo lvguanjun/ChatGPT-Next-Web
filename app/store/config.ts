@@ -46,7 +46,7 @@ export const DEFAULT_CONFIG = {
   models: DEFAULT_MODELS as any as LLMModel[],
 
   modelConfig: {
-    model: "gpt-4" as ModelType,
+    model: "i-just-want-to-use-the-first-custom-model" as ModelType,
     temperature: 0.5,
     top_p: 1,
     max_tokens: 32767, // I don't even know how much 2^15 is, I must be a terrible programmer. :(

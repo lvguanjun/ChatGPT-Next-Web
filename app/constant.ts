@@ -95,9 +95,6 @@ export const Google = {
 
 export const DEFAULT_INPUT_TEMPLATE = `{{input}}`; // input / time / model / lang
 export const DEFAULT_SYSTEM_TEMPLATE = `
-You are ChatGPT, a large language model trained by OpenAI.
-Carefully heed the user's instructions.
-Respond using Markdown.
 You are ChatGPT, a large language model trained by {{ServiceProvider}}.
 Carefully heed the user's instructions.
 Respond using Markdown.
@@ -292,6 +289,15 @@ export const DEFAULT_MODELS = [
       id: "google",
       providerName: "Google",
       providerType: "google",
+    },
+  },
+  {
+    name: "i-just-want-to-use-the-first-custom-model",
+    available: true,
+    provider: {
+      id: "openai",
+      providerName: "OpenAI",
+      providerType: "openai",
     },
   },
 ] as const;
