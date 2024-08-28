@@ -587,7 +587,7 @@ const cn = {
   },
   Store: {
     DefaultTopic: "新的聊天",
-    BotHello: "有什么可以帮你的吗",
+    BotHello: "出现乱码：刷新网页后重试请求。\n问题反馈：https://t.me/+9w4JwuHnkpI2ODM1\n网站被墙：前往 https://chat01.3211000.xyz/\n注意事项：1. 不要大量滥用API 2. 不要触发政策警告\n\n有什么可以帮你的吗?",
     Error: "出错了，稍后重试吧",
     Prompt: {
       History: (content: string) => "这是历史聊天总结作为前情提要：" + content,

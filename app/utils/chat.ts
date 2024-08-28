@@ -330,6 +330,61 @@ export function stream(
             responseTexts.push(Locale.Error.Unauthorized);
           }
 
+          if (res.status === 403) {
+            const responseText = await res.clone().text();
+            if (responseText.includes('Just a moment...')) {
+              const helpUrl = 'https://help.3211000.xyz/refresh';
+
+              // 创建弹窗的外部div
+              const outerDiv = document.createElement('div');
+              outerDiv.style.position = 'fixed';
+              outerDiv.style.top = '0';
+              outerDiv.style.right = '0';
+              outerDiv.style.bottom = '0';
+              outerDiv.style.left = '0';
+              outerDiv.style.display = 'flex';
+              outerDiv.style.justifyContent = 'center';
+              outerDiv.style.alignItems = 'center';
+              outerDiv.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+
+              // 创建弹窗的内部div
+              const innerDiv = document.createElement('div');
+              innerDiv.style.position = 'relative';
+              innerDiv.style.backgroundColor = 'white';
+              innerDiv.style.padding = '20px';
+              innerDiv.style.borderRadius = '10px';
+              innerDiv.style.width = '300px';
+              innerDiv.style.maxWidth = '80%';
+              innerDiv.style.textAlign = 'justify';
+              innerDiv.style.wordBreak = 'break-word';
+
+              // 创建消息元素
+              const msg = document.createElement('p');
+              msg.innerHTML = `您的请求被 Cloudflare 阻止了。请<strong>刷新页面</strong>后<strong>重试请求</strong>。更多帮助信息请查看<a href="${helpUrl}" target="_blank">帮助页面</a>。`;
+              innerDiv.appendChild(msg);
+
+              // 创建关闭按钮
+              const closeButton = document.createElement('button');
+              closeButton.textContent = 'X';
+              closeButton.style.position = 'absolute';
+              closeButton.style.top = '10px';
+              closeButton.style.right = '10px';
+              closeButton.style.background = 'none';
+              closeButton.style.border = 'none';
+              closeButton.style.fontSize = '20px';
+              closeButton.style.cursor = 'pointer';
+              closeButton.addEventListener('click', () => {
+                document.body.removeChild(outerDiv);
+              });
+              innerDiv.appendChild(closeButton);
+
+              outerDiv.appendChild(innerDiv);
+              document.body.appendChild(outerDiv);
+
+              return; // Prevent calling finish() when cf challenge
+            }
+          }
+
           if (extraInfo) {
             responseTexts.push(extraInfo);
           }
