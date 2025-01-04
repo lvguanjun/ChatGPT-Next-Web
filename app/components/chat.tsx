@@ -631,6 +631,15 @@ export function ChatActions(props: {
           icon={<RobotIcon />}
         />
 
+        <ChatAction
+          onClick={() => {
+            chatStore.forkSession();
+            showToast(Locale.Chat.Actions.ForkedToast);
+          }}
+          text={Locale.Chat.Actions.Fork}
+          icon={<CopyIcon />}
+        />
+
         {showModelSelector && (
           <Selector
             defaultSelectedValue={`${currentModel}@${currentProviderName}`}
