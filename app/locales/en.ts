@@ -53,6 +53,8 @@ const en: LocaleType = {
       RefreshToast: "Title refresh request sent",
       Speech: "Play",
       StopSpeech: "Stop",
+      Fork: "Fork Chat",
+      ForkedToast: "Chat Forked"
     },
     Commands: {
       new: "Start a new chat",

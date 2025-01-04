@@ -52,6 +52,8 @@ const cn = {
       RefreshToast: "已发送刷新标题请求",
       Speech: "朗读",
       StopSpeech: "停止",
+      Fork: "复制会话",
+      ForkedToast: "已复制会话"
     },
     Commands: {
       new: "新建聊天",
