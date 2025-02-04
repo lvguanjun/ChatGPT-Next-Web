@@ -125,6 +125,13 @@ function getSummarizeModel(
   currentModel: string,
   providerName: string,
 ): string[] {
+  const configStore = useAppConfig.getState();
+  if (configStore.modelConfig.compressModel) {
+    return [
+      configStore.modelConfig.compressModel,
+      configStore.modelConfig.compressProviderName,
+    ];
+  }
   return [currentModel, providerName];
 }
 

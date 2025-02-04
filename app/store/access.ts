@@ -124,6 +124,8 @@ const DEFAULT_ACCESS_STATE = {
   disableFastLink: false,
   customModels: "",
   defaultModel: "",
+  defaultCompressModel: "",
+  visionModels: "",
 
   // tts config
   edgeTTSVoiceName: "zh-CN-YunxiNeural",
@@ -230,6 +232,15 @@ export const useAccessStore = createPersistStore(
             const [model, providerName] = getModelProvider(defaultModel);
             DEFAULT_CONFIG.modelConfig.model = model;
             DEFAULT_CONFIG.modelConfig.providerName = providerName as any;
+          }
+
+          const defaultCompressModel = res.defaultCompressModel ?? "";
+          if (defaultCompressModel) {
+            const [model, providerName] =
+              getModelProvider(defaultCompressModel);
+            DEFAULT_CONFIG.modelConfig.compressModel = model;
+            DEFAULT_CONFIG.modelConfig.compressProviderName =
+              providerName as any;
           }
 
           return res;
