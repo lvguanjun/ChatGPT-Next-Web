@@ -41,6 +41,7 @@ import RobotIcon from "../icons/robot.svg";
 import SizeIcon from "../icons/size.svg";
 import QualityIcon from "../icons/hd.svg";
 import StyleIcon from "../icons/palette.svg";
+import CloseIcon from "../icons/close.svg";
 import PluginIcon from "../icons/plugin.svg";
 import ShortcutkeyIcon from "../icons/shortcutkey.svg";
 import ReloadIcon from "../icons/reload.svg";
@@ -2104,56 +2105,8 @@ function _Chat() {
                             {message.model}
                           </div>
                         )}
-                      </div>
 
-                      <div className={styles["chat-message-item"]}>
-                        <Markdown
-                          key={message.streaming ? "loading" : "done"}
-                          content={getMessageTextContent(message)}
-                          loading={
-                            (message.preview || message.streaming) &&
-                            message.content.length === 0 &&
-                            !isUser
-                          }
-                          fontSize={fontSize}
-                          fontFamily={fontFamily}
-                          parentRef={scrollRef}
-                          defaultShow={i >= messages.length - 6}
-                        />
-                        {getMessageImages(message).length == 1 && (
-                          <img
-                            className={styles["chat-message-item-image"]}
-                            src={getMessageImages(message)[0]}
-                            alt=""
-                          />
-                        )}
-                        {getMessageImages(message).length > 1 && (
-                          <div
-                            className={styles["chat-message-item-images"]}
-                            style={
-                              {
-                                "--image-count":
-                                  getMessageImages(message).length,
-                              } as React.CSSProperties
-                            }
-                          >
-                            {getMessageImages(message).map((image, index) => {
-                              return (
-                                <img
-                                  className={
-                                    styles["chat-message-item-image-multi"]
-                                  }
-                                  key={index}
-                                  src={image}
-                                  alt=""
-                                />
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-
-                      {showActions && (
+                  {showActions && (
                         <div
                           className={styles["chat-message-actions"]}
                           style={{ marginTop: "8px" }}
@@ -2207,6 +2160,91 @@ function _Chat() {
                           </div>
                         </div>
                       )}
+                      </div>
+                      {message?.tools?.length == 0 && showTyping && (
+                          <div className={styles["chat-message-status"]}>
+                            {Locale.Chat.Typing}
+                          </div>
+                        )}
+                        {/*@ts-ignore*/}
+                        {message?.tools?.length > 0 && (
+                          <div className={styles["chat-message-tools"]}>
+                            {message?.tools?.map((tool) => (
+                              <div
+                                key={tool.id}
+                                title={tool?.errorMsg}
+                                className={styles["chat-message-tool"]}
+                              >
+                                {tool.isError === false ? (
+                                  <ConfirmIcon />
+                                ) : tool.isError === true ? (
+                                  <CloseIcon />
+                                ) : (
+                                  <LoadingButtonIcon />
+                                )}
+                                <span>{tool?.function?.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      <div className={styles["chat-message-item"]}>
+                        <Markdown
+                          key={message.streaming ? "loading" : "done"}
+                          content={getMessageTextContent(message)}
+                          loading={
+                            (message.preview || message.streaming) &&
+                            message.content.length === 0 &&
+                            !isUser
+                          }
+                          fontSize={fontSize}
+                          fontFamily={fontFamily}
+                          parentRef={scrollRef}
+                          defaultShow={i >= messages.length - 6}
+                        />
+                        {getMessageImages(message).length == 1 && (
+                          <img
+                            className={styles["chat-message-item-image"]}
+                            src={getMessageImages(message)[0]}
+                            alt=""
+                          />
+                        )}
+                        {getMessageImages(message).length > 1 && (
+                          <div
+                            className={styles["chat-message-item-images"]}
+                            style={
+                              {
+                                "--image-count":
+                                  getMessageImages(message).length,
+                              } as React.CSSProperties
+                            }
+                          >
+                            {getMessageImages(message).map((image, index) => {
+                              return (
+                                <img
+                                  className={
+                                    styles["chat-message-item-image-multi"]
+                                  }
+                                  key={index}
+                                  src={image}
+                                  alt=""
+                                />
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                      {message?.audio_url && (
+                          <div className={styles["chat-message-audio"]}>
+                            <audio src={message.audio_url} controls />
+                          </div>
+                        )}
+                      <div className={styles["chat-message-action-date"]}>
+                          {isContext
+                            ? Locale.Chat.IsContext
+                            : message.role === "system"
+                            ? message.date.toLocaleString()
+                            : ""}
+                        </div>
                     </div>
                   </div>
                   {shouldShowClearContextDivider && <ClearContextDivider />}
