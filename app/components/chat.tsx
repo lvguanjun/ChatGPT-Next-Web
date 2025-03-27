@@ -1654,7 +1654,7 @@ function _Chat() {
     } else {
       // 处理粘贴的文本
       const text = e.clipboardData.getData("text/plain");
-      if (text && text.length > 1000) {
+      if (text && text.length > 50000) {
         // 如果文本超过1000字符
         e.preventDefault();
 
