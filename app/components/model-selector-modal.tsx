@@ -250,7 +250,10 @@ export function ModelSelectorModal(props: {
 
           if (!response.ok) {
             throw new Error(
-              Locale.Settings.Access.CustomModel.RequestFailed(response.status),
+              Locale.Settings.Access.CustomModel.ServerTestFailedError.replace(
+                "{0}",
+                response.status.toString(),
+              ),
             );
           }
 
@@ -333,7 +336,10 @@ export function ModelSelectorModal(props: {
 
           if (!response.ok) {
             throw new Error(
-              Locale.Settings.Access.CustomModel.RequestFailed(response.status),
+              Locale.Settings.Access.CustomModel.ServerTestFailedError.replace(
+                "{0}",
+                response.status.toString(),
+              ),
             );
           }
 
@@ -683,7 +689,12 @@ export function ModelSelectorModal(props: {
 
   // 修改单独测试模型的函数
   const testSingleModel = async (modelId: string) => {
-    showToast(`开始测试模型: ${modelId}...`);
+    showToast(
+      Locale.Settings.Access.CustomModel.TestStartMessage.replace(
+        "{0}",
+        modelId,
+      ),
+    );
 
     try {
       let result: Record<string, ModelTestResult> = {};
@@ -702,7 +713,12 @@ export function ModelSelectorModal(props: {
         });
 
         if (!response.ok) {
-          throw new Error(`服务端测试失败: ${response.status}`);
+          throw new Error(
+            Locale.Settings.Access.CustomModel.ServerTestFailedError.replace(
+              "{0}",
+              response.status.toString(),
+            ),
+          );
         }
 
         const data = await response.json();
@@ -712,16 +728,32 @@ export function ModelSelectorModal(props: {
         if (result[modelId]) {
           if (result[modelId].success) {
             showToast(
-              `${modelId}: 测试成功 (${(
-                (result[modelId].responseTime || 0) / 1000
-              ).toFixed(2)}s)`,
+              Locale.Settings.Access.CustomModel.TestSuccessMessage.replace(
+                "{0}",
+                modelId,
+              ).replace(
+                "{1}",
+                ((result[modelId].responseTime || 0) / 1000).toFixed(2),
+              ),
             );
           } else if (result[modelId].timeout) {
-            showToast(`${modelId}: 超时`);
+            showToast(
+              Locale.Settings.Access.CustomModel.TestTimeoutMessage.replace(
+                "{0}",
+                modelId,
+              ),
+            );
           } else {
             // 显示详细的错误消息
-            const errorMessage = result[modelId].message || "测试失败";
-            showToast(`${modelId}: ${errorMessage}`);
+            const errorMessage =
+              result[modelId].message ||
+              Locale.Settings.Access.CustomModel.DefaultTestFailedMessage;
+            showToast(
+              Locale.Settings.Access.CustomModel.TestErrorMessage.replace(
+                "{0}",
+                modelId,
+              ).replace("{1}", errorMessage),
+            );
           }
         }
       } else {
@@ -761,7 +793,14 @@ export function ModelSelectorModal(props: {
       try {
         localStorage.setItem(MODELS_STORAGE_KEY, JSON.stringify(updatedModels));
       } catch (error) {
-        console.error("更新本地存储失败:", error);
+        console.error(
+          Locale.Settings.Access.CustomModel.UpdateStorageFailedError,
+          error,
+        );
+        showToast(
+          Locale.Settings.Access.CustomModel.TestErrorPrefix +
+            (error instanceof Error ? error.message : String(error)),
+        );
       }
     } catch (error) {
       console.error("测试模型时出错:", error);
@@ -827,94 +866,127 @@ export function ModelSelectorModal(props: {
         }
         onClose={props.onClose}
         actions={[
-          <ModelTestButton
-            key="test-models"
-            models={filteredModels.map((m) => m.id)}
-            onTestComplete={(results: Record<string, ModelTestResult>) => {
-              // 保留现有的完整更新逻辑
-              // ...
-            }}
-            onModelTested={(
-              modelId: string,
-              result: ModelTestResult,
-              allResults?: Record<string, ModelTestResult>,
-            ) => {
-              // 创建更新后的模型列表，确保保留所有已测试模型的状态
-              const updatedModels = models.map((model) => {
-                // 如果是当前测试的模型，更新其状态
-                if (model.id === modelId) {
-                  return {
-                    ...model,
-                    tested: true,
-                    available: result.success,
-                    responseTime: result.responseTime || 0,
-                    timeout: result.timeout || false,
-                  };
-                }
+          <div
+            key="button-container"
+            className={`${styles.modalButtonContainer} ${styles.modalFooter}`}
+          >
+            {/* 第一行：功能按钮 */}
+            <div className={styles.buttonGroup}>
+              <IconButton
+                key="refresh-models"
+                icon={<ResetIcon />}
+                text={Locale.Settings.Access.CustomModel.RefreshModels}
+                onClick={handleRefreshModels}
+                bordered
+                className={styles.responsiveButton}
+              />
+              <IconButton
+                key="edit-categories"
+                icon={<EditIcon />}
+                text={Locale.Settings.Access.CustomModel.EditCategories}
+                onClick={() => setShowCategoryEditor(true)}
+                bordered
+                className={styles.responsiveButton}
+              />
+            </div>
 
-                // 如果提供了所有结果，并且当前模型在结果中，也更新其状态
-                if (allResults && allResults[model.id]) {
-                  const modelResult = allResults[model.id];
-                  return {
-                    ...model,
-                    tested: true,
-                    available: modelResult.success,
-                    responseTime: modelResult.responseTime || 0,
-                    timeout: modelResult.timeout || false,
-                  };
-                }
+            {/* 第二行：测试和确认按钮 */}
+            <div className={styles.buttonRow}>
+              {/* 超时选择和测试按钮 */}
+              <div className={styles.buttonGroup}>
+                <ModelTestButton
+                  key="test-models"
+                  models={filteredModels.map((m) => m.id)}
+                  onTestComplete={(
+                    results: Record<string, ModelTestResult>,
+                  ) => {
+                    // 保留现有的完整更新逻辑
+                    // ...
+                  }}
+                  onModelTested={(
+                    modelId: string,
+                    result: ModelTestResult,
+                    allResults?: Record<string, ModelTestResult>,
+                  ) => {
+                    // 创建更新后的模型列表，确保保留所有已测试模型的状态
+                    const updatedModels = models.map((model) => {
+                      // 如果是当前测试的模型，更新其状态
+                      if (model.id === modelId) {
+                        return {
+                          ...model,
+                          tested: true,
+                          available: result.success,
+                          responseTime: result.responseTime || 0,
+                          timeout: result.timeout || false,
+                        };
+                      }
 
-                // 否则保持原状态
-                return model;
-              });
+                      // 如果提供了所有结果，并且当前模型在结果中，也更新其状态
+                      if (allResults && allResults[model.id]) {
+                        const modelResult = allResults[model.id];
+                        return {
+                          ...model,
+                          tested: true,
+                          available: modelResult.success,
+                          responseTime: modelResult.responseTime || 0,
+                          timeout: modelResult.timeout || false,
+                        };
+                      }
 
-              // 直接设置状态
-              setModels(updatedModels);
+                      // 否则保持原状态
+                      return model;
+                    });
 
-              // 保存到本地存储
-              try {
-                localStorage.setItem(
-                  MODELS_STORAGE_KEY,
-                  JSON.stringify(updatedModels),
-                );
-              } catch (error) {
-                console.error("更新本地存储失败:", error);
-              }
-            }}
-            onTimeoutChange={(value) => setTestTimeout(value)}
-            initialTimeout={testTimeout}
-            useServerTest={!accessStore.useCustomConfig}
-          />,
-          <div key="spacer" style={{ flex: 1 }}></div>,
-          <IconButton
-            key="refresh-models"
-            icon={<ResetIcon />}
-            text={Locale.Settings.Access.CustomModel.RefreshModels}
-            onClick={handleRefreshModels}
-            bordered
-          />,
-          <IconButton
-            key="edit-categories"
-            icon={<EditIcon />}
-            text={Locale.Settings.Access.CustomModel.EditCategories}
-            onClick={() => setShowCategoryEditor(true)}
-            bordered
-          />,
-          <div key="spacer" style={{ flex: 1 }}></div>,
-          <IconButton
-            key="cancel"
-            icon={<CancelIcon />}
-            bordered
-            text={Locale.UI.Cancel}
-            onClick={props.onClose}
-          />,
-          <IconButton
-            key="confirm"
-            icon={<ConfirmIcon />}
-            bordered
-            text={Locale.UI.Confirm}
-            onClick={handleConfirm}
-          />,
+                    // 直接设置状态
+                    setModels(updatedModels);
+
+                    // 保存到本地存储
+                    try {
+                      localStorage.setItem(
+                        MODELS_STORAGE_KEY,
+                        JSON.stringify(updatedModels),
+                      );
+                    } catch (error) {
+                      console.error(
+                        Locale.Settings.Access.CustomModel
+                          .UpdateStorageFailedError,
+                        error,
+                      );
+                      showToast(
+                        Locale.Settings.Access.CustomModel.TestErrorPrefix +
+                          (error instanceof Error
+                            ? error.message
+                            : String(error)),
+                      );
+                    }
+                  }}
+                  onTimeoutChange={(value) => setTestTimeout(value)}
+                  initialTimeout={testTimeout}
+                  useServerTest={!accessStore.useCustomConfig}
+                />
+              </div>
+
+              {/* 确认取消按钮 */}
+              <div className={styles.buttonGroup}>
+                <IconButton
+                  key="cancel"
+                  icon={<CancelIcon />}
+                  bordered
+                  text={Locale.UI.Cancel}
+                  onClick={props.onClose}
+                  className={styles.responsiveButton}
+                />
+                <IconButton
+                  key="confirm"
+                  icon={<ConfirmIcon />}
+                  bordered
+                  text={Locale.UI.Confirm}
+                  onClick={handleConfirm}
+                  className={styles.responsiveButton}
+                />
+              </div>
+            </div>
+          </div>,
         ]}
       >
         {loading ? (
@@ -1036,8 +1108,10 @@ export function ModelSelectorModal(props: {
                           style={{ cursor: "pointer" }}
                           title={
                             model.tested
-                              ? "点击重新测试此模型"
-                              : "点击测试此模型"
+                              ? Locale.Settings.Access.CustomModel
+                                  .RetestButtonTooltip
+                              : Locale.Settings.Access.CustomModel
+                                  .TestButtonTooltip
                           }
                         >
                           {model.tested
@@ -1046,9 +1120,10 @@ export function ModelSelectorModal(props: {
                                   2,
                                 )}s`
                               : model.timeout
-                              ? "超时"
-                              : "失败"
-                            : "测试"}
+                              ? Locale.Settings.Access.CustomModel.TestTimeout
+                              : Locale.Settings.Access.CustomModel
+                                  .TestUnavailable
+                            : Locale.Settings.Access.CustomModel.TestButton}
                         </span>
                       </div>
                     )}

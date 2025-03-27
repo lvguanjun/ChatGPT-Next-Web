@@ -60,6 +60,20 @@ export class GeminiProApi implements LLMApi {
   extractMessage(res: any) {
     console.log("[Response] gemini-pro response: ", res);
 
+    // 处理数组形式的响应（多个块）
+    if (Array.isArray(res)) {
+      // 合并所有文本块
+      let fullText = "";
+      for (const chunk of res) {
+        const textPart = chunk?.candidates?.at(0)?.content?.parts?.at(0)?.text;
+        if (textPart) {
+          fullText += textPart;
+        }
+      }
+      return fullText || "";
+    }
+
+    // 处理单个响应对象
     return (
       res?.candidates?.at(0)?.content?.parts.at(0)?.text ||
       res?.at(0)?.candidates?.at(0)?.content?.parts.at(0)?.text ||
@@ -219,6 +233,7 @@ export class GeminiProApi implements LLMApi {
             // console.log("parseSSE", text, runTools);
             const chunkJson = JSON.parse(text);
 
+            // 处理函数调用
             const functionCall = chunkJson?.candidates
               ?.at(0)
               ?.content.parts.at(0)?.functionCall;
@@ -233,6 +248,31 @@ export class GeminiProApi implements LLMApi {
                 },
               });
             }
+
+            // 处理图像数据
+            const part = chunkJson?.candidates?.at(0)?.content?.parts?.at(0);
+            if (part?.inlineData) {
+              // 检查是否有多个部分
+              const parts = chunkJson?.candidates?.at(0)?.content?.parts;
+              let textContent = "";
+
+              // 查找其他部分中的文本内容
+              if (parts && parts.length > 1) {
+                for (let i = 1; i < parts.length; i++) {
+                  if (parts[i].text) {
+                    textContent += parts[i].text;
+                  }
+                }
+              }
+
+              // 返回图像数据和文本内容
+              return JSON.stringify({
+                data: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`,
+                type: "base64_image",
+                text: textContent,
+              });
+            }
+
             return chunkJson?.candidates?.at(0)?.content.parts.at(0)?.text;
           },
           // processToolMessage, include tool_calls message and tool call results

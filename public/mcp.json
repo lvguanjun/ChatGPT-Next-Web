@@ -1,0 +1,276 @@
+{
+  "data": [
+    {
+      "id": "filesystem",
+      "name": "Filesystem",
+      "description": "Secure file operations with configurable access controls",
+      "tags": ["filesystem", "access-control"],
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "paths": {
+            "type": "array",
+            "description": "Allowed file system paths",
+            "required": true,
+            "minItems": 1
+          }
+        }
+      },
+      "argsMapping": {
+        "paths": {
+          "type": "spread",
+          "position": 2
+        }
+      }
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "description": "Repository management, file operations, and GitHub API integration",
+      "tags": ["github", "repository", "api"],
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-github"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "GitHub Personal Access Token",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "token": {
+          "type": "env",
+          "key": "GITHUB_PERSONAL_ACCESS_TOKEN"
+        }
+      }
+    },
+    {
+      "id": "gdrive",
+      "name": "Google Drive",
+      "tags": ["google", "filesystem", "api"],
+      "description": "File access and search capabilities for Google Drive",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive",
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-gdrive"],
+      "configurable": false
+    },
+    {
+      "id": "brave-search",
+      "name": "Brave Search",
+      "description": "Web search capabilities using Brave Search API",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+      "tags": ["search", "web", "api"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Brave Search API Key",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "apiKey": {
+          "type": "env",
+          "key": "BRAVE_API_KEY"
+        }
+      }
+    },
+    {
+      "id": "puppeteer",
+      "name": "Puppeteer",
+      "description": "Web browsing and scraping capabilities using headless Chrome",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
+      "tags": ["browser", "web", "scraping"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "configurable": false
+    },
+    {
+      "id": "fetch",
+      "name": "Fetch",
+      "description": "Web content fetching capabilities, converting HTML to markdown for easier consumption",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+      "tags": ["web", "content", "markdown"],
+      "command": "uvx",
+      "baseArgs": ["mcp-server-fetch"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "ignoreRobotsTxt": {
+            "type": "boolean",
+            "description": "Ignore robots.txt restrictions",
+            "required": false
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "Custom User-Agent string",
+            "required": false
+          }
+        }
+      },
+      "argsMapping": {
+        "ignoreRobotsTxt": {
+          "type": "flag",
+          "flag": "--ignore-robots-txt",
+          "condition": true
+        },
+        "userAgent": {
+          "type": "param",
+          "param": "--user-agent"
+        }
+      }
+    },
+    {
+      "id": "everart",
+      "name": "Everart",
+      "description": "AI art generation and image manipulation capabilities",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/everart",
+      "tags": ["art", "image", "generation"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-everart"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Everart API Key",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "apiKey": {
+          "type": "env",
+          "key": "EVERART_API_KEY"
+        }
+      }
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "description": "Git repository management and operations",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+      "tags": ["git", "repository", "version-control"],
+      "command": "uv",
+      "baseArgs": ["run", "mcp-server-git"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "Path to the Git repository directory",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "directory": {
+          "type": "param",
+          "param": "--directory",
+          "position": 0
+        }
+      }
+    },
+    {
+      "id": "aws-kb-retrieval",
+      "name": "AWS Knowledge Base Retrieval",
+      "description": "Retrieve information from AWS Knowledge Bases for AI assistants",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/aws-kb-retrieval",
+      "tags": ["aws", "knowledge-base", "retrieval"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-aws-kb-retrieval"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "accessKeyId": {
+            "type": "string",
+            "description": "AWS Access Key ID",
+            "required": true
+          },
+          "secretAccessKey": {
+            "type": "string",
+            "description": "AWS Secret Access Key",
+            "required": true
+          },
+          "region": {
+            "type": "string",
+            "description": "AWS Region",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "accessKeyId": {
+          "type": "env",
+          "key": "AWS_ACCESS_KEY_ID"
+        },
+        "secretAccessKey": {
+          "type": "env",
+          "key": "AWS_SECRET_ACCESS_KEY"
+        },
+        "region": {
+          "type": "env",
+          "key": "AWS_REGION"
+        }
+      }
+    },
+    {
+      "id": "everything",
+      "name": "Everything",
+      "description": "Fast file search capabilities using Everything search engine",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/everything",
+      "tags": ["search", "filesystem", "windows"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-everything"],
+      "configurable": false
+    },
+    {
+      "id": "sqlite",
+      "name": "SQLite",
+      "description": "SQLite database access and query capabilities",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+      "tags": ["database", "sql", "sqlite"],
+      "command": "uv",
+      "baseArgs": ["run", "mcp-server-sqlite"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "Path to the servers repository directory",
+            "required": true
+          },
+          "dbPath": {
+            "type": "string",
+            "description": "Path to the SQLite database file",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "directory": {
+          "type": "param",
+          "param": "--directory",
+          "position": 0
+        },
+        "dbPath": {
+          "type": "param",
+          "param": "--db-path",
+          "position": 3
+        }
+      }
+    }
+  ]
+}
+  

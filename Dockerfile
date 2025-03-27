@@ -19,7 +19,7 @@ RUN apk update && apk add --no-cache git
 ENV OPENAI_API_KEY=""
 ENV GOOGLE_API_KEY=""
 ENV CODE=""
-
+ENV ENABLE_MCP=""
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -40,7 +40,7 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/.next/server ./.next/server
-
+RUN mkdir -p /app/app/mcp && chmod 777 /app/app/mcp
 EXPOSE 3000
 
 CMD if [ -n "$PROXY_URL" ]; then \

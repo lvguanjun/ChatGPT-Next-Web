@@ -1382,15 +1382,10 @@ export function Settings() {
       subTitle={Locale.Settings.Access.CustomModel.SubTitle}
       vertical={true}
     >
-      <div style={{ display: "flex", width: "100%", gap: "10px" }}>
+      <div className={styles["custom-model-container"]}>
         <input
           aria-label={Locale.Settings.Access.CustomModel.Title}
-          style={{
-            flex: 1,
-            maxWidth: "unset",
-            textAlign: "left",
-            minWidth: "70%", // 确保输入框至少占据70%的宽度
-          }}
+          className={styles["custom-model-input"]}
           type="text"
           value={config.customModels}
           placeholder={serverCustomModels || "model1,model2,model3"}
@@ -1410,7 +1405,7 @@ export function Settings() {
               showToast("请先在设置中输入访问密码");
             }
           }}
-          style={{ flexShrink: 0 }} // 防止按钮被压缩
+          className={styles["custom-model-button"]}
         />
       </div>
     </ListItem>

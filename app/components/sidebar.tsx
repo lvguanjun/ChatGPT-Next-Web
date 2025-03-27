@@ -11,10 +11,12 @@ import MaskIcon from "../icons/mask.svg";
 import DragIcon from "../icons/drag.svg";
 import DiscoveryIcon from "../icons/discovery.svg";
 import NeatIcon from "../icons/neat.svg";
+import McpIcon from "../icons/mcp.svg";
+import LoadingIcon from "../icons/three-dots.svg";
 
 import Locale from "../locales";
 
-import { useAppConfig, useChatStore } from "../store";
+import { useAppConfig, useChatStore, useAccessStore } from "../store";
 
 import {
   DEFAULT_SIDEBAR_WIDTH,
@@ -31,10 +33,27 @@ import { isIOS, useMobileScreen } from "../utils";
 import dynamic from "next/dynamic";
 import { showConfirm, SimpleSelector } from "./ui-lib";
 import clsx from "clsx";
+import { isMcpEnabled, initializeMcpSystem } from "../mcp/actions";
+import { getClientConfig } from "../config/client";
 
 const ChatList = dynamic(async () => (await import("./chat-list")).ChatList, {
   loading: () => null,
 });
+
+const McpMarketPage = dynamic(
+  async () => (await import("./mcp-market")).McpMarketPage,
+  {
+    loading: () => <Loading noLogo />,
+  },
+);
+
+function Loading(props: { noLogo?: boolean }) {
+  return (
+    <div className="loading-content">
+      <LoadingIcon />
+    </div>
+  );
+}
 
 export function useHotKey() {
   const chatStore = useChatStore();
@@ -227,6 +246,36 @@ export function SideBar(props: { className?: string }) {
   const navigate = useNavigate();
   const config = useAppConfig();
   const chatStore = useChatStore();
+  const [mcpEnabled, setMcpEnabled] = useState(false);
+
+  useEffect(() => {
+    console.log("[Config] got config from build time", getClientConfig());
+    useAccessStore.getState().fetch();
+
+    const initMcp = async () => {
+      try {
+        const enabled = await isMcpEnabled();
+        if (enabled) {
+          console.log("[MCP] initializing...");
+          await initializeMcpSystem();
+          console.log("[MCP] initialized");
+        }
+      } catch (err) {
+        console.error("[MCP] failed to initialize:", err);
+      }
+    };
+    initMcp();
+  }, []);
+
+  useEffect(() => {
+    // 检查 MCP 是否启用
+    const checkMcpStatus = async () => {
+      const enabled = await isMcpEnabled();
+      setMcpEnabled(enabled);
+      console.log("[SideBar] MCP enabled:", enabled);
+    };
+    checkMcpStatus();
+  }, []);
 
   return (
     <SideBarContainer
@@ -254,6 +303,17 @@ export function SideBar(props: { className?: string }) {
             }}
             shadow
           />
+          {mcpEnabled && (
+            <IconButton
+              icon={<McpIcon />}
+              text={shouldNarrow ? undefined : Locale.Mcp.Name}
+              className={styles["sidebar-bar-button"]}
+              onClick={() => {
+                navigate(Path.McpMarket, { state: { fromHome: true } });
+              }}
+              shadow
+            />
+          )}
           <IconButton
             icon={<DiscoveryIcon />}
             text={shouldNarrow ? undefined : Locale.Discovery.Name}

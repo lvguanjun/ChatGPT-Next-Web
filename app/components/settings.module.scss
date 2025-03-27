@@ -79,6 +79,23 @@
   }
 }
 
+.custom-model-container {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  
+  .custom-model-input {
+    flex: 1;
+    max-width: unset;
+    text-align: left;
+    min-width: 60%;
+  }
+  
+  .custom-model-button {
+    flex-shrink: 0;
+  }
+}
+
 @media (max-width: 600px) {
   .settings {
     button {
@@ -93,6 +110,19 @@
     
     :global(.icon-button) {
       padding: 8px !important;
+    }
+    
+    .custom-model-container {
+      gap: 5px;
+      
+      .custom-model-input {
+        min-width: 50%;
+      }
+      
+      .custom-model-button {
+        padding: 6px !important;
+        font-size: 12px;
+      }
     }
   }
 }

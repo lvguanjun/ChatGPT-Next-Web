@@ -153,15 +153,43 @@
   }
 }
 
-// 添加媒体查询，在移动设备上隐藏标题
+// 修改媒体查询部分
 @media (max-width: 600px) {
   .modelSelector {
     &HeaderTitle {
-      display: none; // 在移动端隐藏标题
+      display: none;
     }
     
     &HeaderControls {
-      width: 100%; // 让控制区域占据全部宽度
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+    
+    &HeaderSearchArea {
+      width: 100%;
+      display: flex;
+      justify-content: space-between; // 使搜索框和下拉框分布在两端
+    }
+    
+    &HeaderButtons {
+      width: auto; // 改为自动宽度
+      margin-left: auto; // 靠右对齐
+      justify-content: flex-end; // 按钮靠右
+    }
+  }
+}
+
+/* 为模态框底部按钮添加一个特定的类，避免使用:global */
+.modalFooter {
+  @media (max-width: 600px) {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    
+    & > div {
+      width: 100%;
     }
   }
 }
@@ -207,4 +235,51 @@
   padding: 2px 6px;
   margin-right: 10px;
   font-weight: bold;
+}
+
+.modalButtonContainer {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px; /* 统一顶层容器间距 */
+  
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+.buttonRow {
+  display: flex;
+  width: 100%;
+  justify-content: space-between; /* 改为平均分布 */
+  gap: 15px; /* 统一行间距 */
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px; /* 按钮组内部间距保持不变 */
+  
+  /* 删除所有特殊边距规则 */
+  &:first-child {
+    margin-right: 0;
+  }
+  
+  &:not(:first-child) {
+    margin-left: 0;
+  }
+}
+
+.responsiveButton {
+  @media (max-width: 600px) {
+    flex: 1;
+    
+    & > span {
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
 } 

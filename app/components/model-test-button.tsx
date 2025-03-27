@@ -44,7 +44,7 @@ export function ModelTestButton(props: {
         abortControllerRef.current.abort();
       }
       setTesting(false);
-      showToast("已停止测试");
+      showToast(Locale.Settings.Access.CustomModel.TestStopped);
       return;
     }
 
@@ -74,7 +74,12 @@ export function ModelTestButton(props: {
         // 使用服务端测试
         try {
           // 显示开始测试的提示消息
-          showToast(`开始测试 ${modelsToTest.length} 个模型...`);
+          showToast(
+            Locale.Settings.Access.CustomModel.TestAllModelsStart.replace(
+              "{0}",
+              modelsToTest.length.toString(),
+            ),
+          );
 
           // 创建一个本地变量来跟踪最新的测试结果
           const testResults: Record<string, ModelTestResult> = {};
@@ -112,15 +117,31 @@ export function ModelTestButton(props: {
             if (result) {
               if (result.success) {
                 showToast(
-                  `${modelId}: 测试成功 (${(
-                    (result.responseTime || 0) / 1000
-                  ).toFixed(2)}s)`,
+                  Locale.Settings.Access.CustomModel.TestSuccessMessage.replace(
+                    "{0}",
+                    modelId,
+                  ).replace(
+                    "{1}",
+                    ((result.responseTime || 0) / 1000).toFixed(2),
+                  ),
                 );
               } else if (result.timeout) {
-                showToast(`${modelId}: 超时`);
+                showToast(
+                  Locale.Settings.Access.CustomModel.TestTimeoutMessage.replace(
+                    "{0}",
+                    modelId,
+                  ),
+                );
               } else {
-                const errorMessage = result.message || "测试失败";
-                showToast(`${modelId}: ${errorMessage}`);
+                const errorMessage =
+                  result.message ||
+                  Locale.Settings.Access.CustomModel.DefaultTestFailedMessage;
+                showToast(
+                  Locale.Settings.Access.CustomModel.TestErrorMessage.replace(
+                    "{0}",
+                    modelId,
+                  ).replace("{1}", errorMessage),
+                );
               }
 
               // 使用函数式更新确保基于最新状态
@@ -171,7 +192,10 @@ export function ModelTestButton(props: {
           (r) => r.success,
         ).length;
         showToast(
-          `测试完成: ${successCount}/${modelsToTest.length} 个模型可用`,
+          Locale.Settings.Access.CustomModel.TestCompleteMessage.replace(
+            "{0}",
+            successCount.toString(),
+          ).replace("{1}", modelsToTest.length.toString()),
         );
       }
     } catch (error) {
@@ -179,7 +203,8 @@ export function ModelTestButton(props: {
       if (error instanceof Error && error.name !== "AbortError") {
         console.error("测试模型时出错:", error);
         showToast(
-          `测试出错: ${error instanceof Error ? error.message : String(error)}`,
+          Locale.Settings.Access.CustomModel.TestErrorPrefix +
+            (error instanceof Error ? error.message : String(error)),
         );
       }
     } finally {
@@ -200,16 +225,32 @@ export function ModelTestButton(props: {
           height: "28px",
         }}
       >
-        <option value="5">5秒</option>
-        <option value="6">6秒</option>
-        <option value="7">7秒</option>
-        <option value="8">8秒</option>
-        <option value="9">9秒</option>
-        <option value="10">10秒</option>
+        <option value="5">
+          {Locale.Settings.Access.CustomModel.TimeoutOptions.FiveSeconds}
+        </option>
+        <option value="6">
+          {Locale.Settings.Access.CustomModel.TimeoutOptions.SixSeconds}
+        </option>
+        <option value="7">
+          {Locale.Settings.Access.CustomModel.TimeoutOptions.SevenSeconds}
+        </option>
+        <option value="8">
+          {Locale.Settings.Access.CustomModel.TimeoutOptions.EightSeconds}
+        </option>
+        <option value="9">
+          {Locale.Settings.Access.CustomModel.TimeoutOptions.NineSeconds}
+        </option>
+        <option value="10">
+          {Locale.Settings.Access.CustomModel.TimeoutOptions.TenSeconds}
+        </option>
       </select>
       <IconButton
         icon={undefined}
-        text={testing ? "停止测试" : "全部测试"}
+        text={
+          testing
+            ? Locale.Settings.Access.CustomModel.StopTest
+            : Locale.Settings.Access.CustomModel.TestAll
+        }
         onClick={handleTest}
         bordered
         disabled={false}

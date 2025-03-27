@@ -168,8 +168,11 @@ export class AudioHandler {
     view.setUint32(36, 1684108385, false); // data chunk identifier 'data'
     view.setUint32(40, byteLength, true); // data chunk length
 
-    // using data.buffer, so no need to setUint16 to view.
-    return new Blob([view, data.buffer], { type: "audio/mpeg" });
+    // 创建一个新的 ArrayBuffer 并复制数据
+    const dataBuffer = new Uint8Array(data.buffer);
+
+    // 使用新创建的 ArrayBuffer
+    return new Blob([view, dataBuffer], { type: "audio/mpeg" });
   }
   savePlayFile() {
     // @ts-ignore

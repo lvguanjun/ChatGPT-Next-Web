@@ -45,5 +45,6 @@ dev
 
 *.key
 *.key.pub
-
+cicd.sh
 masks.json
+app/mcp/mcp_config.json

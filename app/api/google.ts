@@ -6,6 +6,9 @@ import { prettyObject } from "@/app/utils/format";
 
 const serverConfig = getServerSideConfig();
 
+// 添加 Gemini 图像生成模型的常量
+const GEMINI_IMAGE_GENERATION_MODEL = "gemini-2.0-flash-exp";
+
 export async function handle(
   req: NextRequest,
   { params }: { params: { provider: string; path: string[] } },
@@ -75,6 +78,9 @@ async function request(req: NextRequest, apiKey: string) {
 
   let path = `${req.nextUrl.pathname}`.replaceAll(ApiPath.Google, "");
 
+  // 检查是否为图像生成请求
+  const isImageGenerationRequest = path.includes(GEMINI_IMAGE_GENERATION_MODEL);
+
   if (!baseUrl.startsWith("http")) {
     baseUrl = `https://${baseUrl}`;
   }
@@ -92,22 +98,69 @@ async function request(req: NextRequest, apiKey: string) {
     },
     10 * 60 * 1000,
   );
-  const fetchUrl = `${baseUrl}${path}${
-    req?.nextUrl?.searchParams?.get("alt") === "sse" ? "?alt=sse" : ""
-  }`;
+
+  // 构建请求 URL，处理图像生成的特殊参数
+  let fetchUrl = `${baseUrl}${path}`;
+  if (req?.nextUrl?.searchParams?.get("alt") === "sse") {
+    fetchUrl += "?alt=sse";
+  }
 
   console.log("[Fetch Url] ", fetchUrl);
+
+  // 准备请求头
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    "Cache-Control": "no-store",
+    "x-goog-api-key": apiKey,
+  };
+
+  // 如果请求头中有 x-goog-api-key 或 Authorization，使用它们
+  if (req.headers.get("x-goog-api-key")) {
+    headers["x-goog-api-key"] = req.headers.get("x-goog-api-key") || "";
+  } else if (req.headers.get("Authorization")) {
+    headers["x-goog-api-key"] = (
+      req.headers.get("Authorization") || ""
+    ).replace("Bearer ", "");
+  }
+
+  // 处理请求体，对于图像生成请求可能需要特殊处理
+  let body: BodyInit | null = req.body;
+
+  // 如果是图像生成请求，确保请求体包含正确的 responseModalities
+  if (isImageGenerationRequest && req.body) {
+    try {
+      // 克隆请求以读取其内容
+      const clonedReq = req.clone();
+      const bodyText = await clonedReq.text();
+      const bodyJson = JSON.parse(bodyText);
+
+      // 确保 generationConfig 包含 responseModalities
+      if (!bodyJson.generationConfig) {
+        bodyJson.generationConfig = {};
+      }
+
+      // 确保 responseModalities 包含 Image
+      if (
+        !bodyJson.generationConfig.responseModalities ||
+        !bodyJson.generationConfig.responseModalities.includes("Image")
+      ) {
+        bodyJson.generationConfig.responseModalities = ["Text", "Image"];
+      }
+
+      // 创建新的请求体
+      body = JSON.stringify(bodyJson);
+    } catch (e) {
+      console.error(
+        "[Google Image Generation] Failed to process request body",
+        e,
+      );
+    }
+  }
+
   const fetchOptions: RequestInit = {
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-store",
-      "x-goog-api-key":
-        req.headers.get("x-goog-api-key") ||
-        (req.headers.get("Authorization") ?? "").replace("Bearer ", ""),
-    },
+    headers,
     method: req.method,
-    body: req.body,
-    // to fix #2485: https://stackoverflow.com/questions/55920957/cloudflare-worker-typeerror-one-time-use-body
+    body,
     redirect: "manual",
     // @ts-ignore
     duplex: "half",

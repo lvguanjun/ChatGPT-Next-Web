@@ -988,15 +988,20 @@ export function uploadAttachments(
         const file = files[i];
         try {
           // 检查是否为图片文件
-          if (file.type.startsWith("image/")) {
+          if (file.type.startsWith("image/") && !file.name.endsWith(".svg")) {
             const imageUrl = await uploadImageRemote(file);
             imageUrls.push(imageUrl);
           } else {
-            // 处理文本文件
+            // 处理文本文件，包括SVG
             let text = "";
 
-            // 根据文件类型选择不同的读取方法
-            if (file.name.endsWith(".docx") || file.name.endsWith(".doc")) {
+            // SVG文件特殊处理
+            if (file.name.endsWith(".svg")) {
+              text = await readFileAsText(file);
+            } else if (
+              file.name.endsWith(".docx") ||
+              file.name.endsWith(".doc")
+            ) {
               text = await readWordFile(file);
             } else if (
               file.name.endsWith(".pptx") ||

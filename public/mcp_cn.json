@@ -1,0 +1,449 @@
+{
+  "data": [
+    {
+      "id": "Filesystem",
+      "name": "Filesystem",
+      "description": "具有可配置访问控制的安全文件操作",
+      "tags": ["Filesystem", "AccessControl"],
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-filesystem"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "paths": {
+            "type": "array",
+            "description": "允许访问的文件系统路径",
+            "required": true,
+            "minItems": 1
+          }
+        }
+      },
+      "argsMapping": {
+        "paths": {
+          "type": "spread",
+          "position": 2
+        }
+      }
+    },
+    {
+      "id": "GitHub",
+      "name": "GitHub",
+      "description": "仓库管理、文件操作和 GitHub API 集成",
+      "tags": ["GitHub", "Repository", "API"],
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/github",
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-github"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "GitHub 个人访问令牌",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "token": {
+          "type": "env",
+          "key": "GITHUB_PERSONAL_ACCESS_TOKEN"
+        }
+      }
+    },
+    {
+      "id": "Google Drive",
+      "name": "Google Drive",
+      "tags": ["Google", "Filesystem", "API"],
+      "description": "Google 云端硬盘的文件访问和搜索功能",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive",
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-gdrive"],
+      "configurable": false
+    },
+    {
+      "id": "Brave Search",
+      "name": "Brave Search",
+      "description": "使用 Brave 搜索 API 的网络搜索功能",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/brave-search",
+      "tags": ["Search", "Web", "API"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Brave 搜索 API 密钥",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "apiKey": {
+          "type": "env",
+          "key": "BRAVE_API_KEY"
+        }
+      }
+    },
+    {
+      "id": "Puppeteer",
+      "name": "Puppeteer",
+      "description": "使用无头 Chrome 的网页浏览和抓取功能",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer",
+      "tags": ["Browser", "Web", "Scraping"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "configurable": false
+    },
+    {
+      "id": "Fetch",
+      "name": "Fetch",
+      "description": "网页内容获取功能，将 HTML 转换为 Markdown 以便更容易阅读",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+      "tags": ["Web", "Content", "Markdown"],
+      "command": "uvx",
+      "baseArgs": ["mcp-server-fetch"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "ignoreRobotsTxt": {
+            "type": "boolean",
+            "description": "忽略 robots.txt 限制",
+            "required": false
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "自定义 User-Agent 字符串",
+            "required": false
+          }
+        }
+      },
+      "argsMapping": {
+        "ignoreRobotsTxt": {
+          "type": "flag",
+          "flag": "--ignore-robots-txt",
+          "condition": true
+        },
+        "userAgent": {
+          "type": "param",
+          "param": "--user-agent"
+        }
+      }
+    },
+    {
+      "id": "Everart",
+      "name": "Everart",
+      "description": "AI 艺术生成和图像处理功能",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/everart",
+      "tags": ["Art", "Image", "Generation"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-everart"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Everart API 密钥",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "apiKey": {
+          "type": "env",
+          "key": "EVERART_API_KEY"
+        }
+      }
+    },
+    {
+      "id": "Git",
+      "name": "Git",
+      "description": "Git 仓库管理和操作",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
+      "tags": ["Git", "Repository", "VersionControl"],
+      "command": "uv",
+      "baseArgs": ["run", "mcp-server-git"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "Git 仓库目录路径",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "directory": {
+          "type": "param",
+          "param": "--directory",
+          "position": 0
+        }
+      }
+    },
+    {
+      "id": "AWS Knowledge Base Retrieval",
+      "name": "AWS Knowledge Base Retrieval",
+      "description": "让 AI 助手从 AWS 知识库中检索信息",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/aws-kb-retrieval",
+      "tags": ["AWS", "KnowledgeBase", "Retrieval"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-aws-kb-retrieval"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "accessKeyId": {
+            "type": "string",
+            "description": "AWS 访问密钥 ID",
+            "required": true
+          },
+          "secretAccessKey": {
+            "type": "string",
+            "description": "AWS 秘密访问密钥",
+            "required": true
+          },
+          "region": {
+            "type": "string",
+            "description": "AWS 区域",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "accessKeyId": {
+          "type": "env",
+          "key": "AWS_ACCESS_KEY_ID"
+        },
+        "secretAccessKey": {
+          "type": "env",
+          "key": "AWS_SECRET_ACCESS_KEY"
+        },
+        "region": {
+          "type": "env",
+          "key": "AWS_REGION"
+        }
+      }
+    },
+    {
+      "id": "SQLite",
+      "name": "SQLite",
+      "description": "SQLite 数据库访问和查询功能",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/sqlite",
+      "tags": ["Database", "SQL", "SQLite"],
+      "command": "uv",
+      "baseArgs": ["run", "mcp-server-sqlite"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "directory": {
+            "type": "string",
+            "description": "服务器仓库目录路径",
+            "required": true
+          },
+          "dbPath": {
+            "type": "string",
+            "description": "SQLite 数据库文件路径",
+            "required": true
+          }
+        }
+      },
+      "argsMapping": {
+        "directory": {
+          "type": "param",
+          "param": "--directory",
+          "position": 0
+        },
+        "dbPath": {
+          "type": "param",
+          "param": "--db-path",
+          "position": 3
+        }
+      }
+    },
+    {
+      "id": "google-maps",
+      "name": "Google Maps",
+      "description": "Google Maps API 服务，提供地理编码、地点搜索、路线规划等功能",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/google-maps",
+      "tags": ["Google Maps", "Geolocation", "API"],
+      "command": "npx",
+      "baseArgs": [
+        "-y",
+        "@modelcontextprotocol/server-google-maps"
+      ],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Google Maps API 密钥",
+            "required": true
+          },
+          "rateLimit": {
+            "type": "number",
+            "description": "API 请求速率限制（次/秒）",
+            "default": 10
+          }
+        }
+      },
+      "argsMapping": {
+        "apiKey": {
+          "type": "env",
+          "envVar": "GOOGLE_MAPS_API_KEY"
+        },
+        "rateLimit": {
+          "type": "param",
+          "param": "--rate-limit",
+          "position": 2
+        }
+      }
+    },
+    {
+      "id": "Knowledge Graph Memory",
+      "name": "Knowledge Graph Memory",
+      "description": "基于本地知识图谱的持久化记忆系统，支持实体关系建模和多维度信息存储",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/memory",
+      "tags": ["Memory", "Knowledge Graph", "Persistent Storage"],
+      "command": "npx",
+      "baseArgs": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "MEMORY_FILE_PATH": {
+            "type": "string",
+            "description": "记忆存储文件路径",
+            "default": "memory.json"
+          }
+        }
+      },
+      "argsMapping": {
+        "MEMORY_FILE_PATH": {
+          "type": "env",
+          "envVar": "MEMORY_FILE_PATH"
+        }
+      }
+    },
+    {
+      "id": "Sequential Thinking Server",
+      "name": "Sequential Thinking Server",
+      "description": "提供结构化的问题分解与动态调整能力，支持多路径推理和假设验证",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking",
+      "tags": ["problem-solving", "reasoning-paths", "dynamic-adjustment"],
+      "command": "npx",
+      "baseArgs": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "MAX_THOUGHTS": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 50,
+            "description": "最大允许的思维步骤数",
+            "default": 15
+          },
+          "TIMEOUT": {
+            "type": "number",
+            "description": "单步处理超时时间（毫秒）",
+            "default": 30000
+          },
+          "REVISION_DEPTH": {
+            "type": "integer",
+            "description": "最大允许的修订深度",
+            "default": 3
+          }
+        },
+        "required": ["MAX_THOUGHTS"]
+      },
+      "argsMapping": {
+        "MAX_THOUGHTS": {
+          "type": "arg",
+          "index": 2
+        },
+        "TIMEOUT": {
+          "type": "env",
+          "envVar": "ST_TIMEOUT"
+        }
+      }
+    },
+    {
+      "id": "PostgreSQL",
+      "name": "PostgreSQL",
+      "description": "提供安全的 PostgreSQL 数据库只读访问，支持模式发现与 SQL 查询审计",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/postgres",
+      "tags": ["Database", "PostgreSQL", "Read-Only"],
+      "command": "npx",
+      "baseArgs": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "DB_CONNECTION_STRING": {
+            "type": "string",
+            "format": "uri",
+            "description": "PostgreSQL 连接字符串",
+            "default": "postgresql://localhost:5432/mydb"
+          },
+          "QUERY_TIMEOUT": {
+            "type": "number",
+            "description": "查询超时时间（毫秒）",
+            "default": 10000
+          }
+        },
+        "required": ["DB_CONNECTION_STRING"]
+      },
+      "argsMapping": {
+        "DB_CONNECTION_STRING": {
+          "type": "arg",
+          "index": 2
+        },
+        "QUERY_TIMEOUT": {
+          "type": "env",
+          "envVar": "PG_QUERY_TIMEOUT"
+        }
+      }
+    },
+    {
+      "id": "GitLab",
+      "name": "GitLab",
+      "description": "GitLab 项目管理、文件操作和 API 集成",
+      "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/gitlab",
+      "tags": ["GitLab", "Repository", "API"],
+      "command": "npx",
+      "baseArgs": ["-y", "@modelcontextprotocol/server-gitlab"],
+      "configurable": true,
+      "configSchema": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "GitLab 个人访问令牌",
+            "required": true
+          },
+          "apiUrl": {
+            "type": "string",
+            "description": "GitLab API URL（可选，用于自托管实例）",
+            "required": false
+          }
+        }
+      },
+      "argsMapping": {
+        "token": {
+          "type": "env",
+          "key": "GITLAB_PERSONAL_ACCESS_TOKEN"
+        },
+        "apiUrl": {
+          "type": "env",
+          "key": "GITLAB_API_URL"
+        }
+      }
+    }
+  ]
+} 

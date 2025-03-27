@@ -46,6 +46,7 @@ import PluginIcon from "../icons/plugin.svg";
 import ShortcutkeyIcon from "../icons/shortcutkey.svg";
 import ReloadIcon from "../icons/reload.svg";
 import HeadphoneIcon from "../icons/headphone.svg";
+import McpToolIcon from "../icons/tool.svg";
 import {
   ChatMessage,
   SubmitKey,
@@ -129,6 +130,9 @@ import {
   uploadAttachments,
   readFileAsText,
 } from "../utils/file";
+import { getAvailableClientsCount, isMcpEnabled } from "../mcp/actions";
+
+import { ImageEditor } from "./image-editor";
 
 const localStorage = safeLocalStorage();
 
@@ -886,7 +890,7 @@ export function EditMessageModal(props: { onClose: () => void }) {
   );
 }
 
-export function DeleteImageButton(props: { deleteImage: () => void }) {
+export function DeleteImageButton(props: { deleteImage: (e?: any) => void }) {
   return (
     <div className={styles["delete-image"]} onClick={props.deleteImage}>
       <DeleteIcon />
@@ -1324,7 +1328,10 @@ function _Chat() {
     const textContent = getMessageTextContent(userMessage);
     const images = getMessageImages(userMessage);
     chatStore.onUserInput(textContent, images).then(() => setIsLoading(false));
-    inputRef.current?.focus();
+    // 只在非移动设备上聚焦输入框
+    if (!isMobileScreen) {
+      inputRef.current?.focus();
+    }
   };
 
   const onPinMessage = (message: ChatMessage) => {
@@ -1873,6 +1880,45 @@ function _Chat() {
     setAttachedFiles(attachedFiles.filter((_, i) => i !== index));
   }
 
+  const MCPAction = () => {
+    const [count, setCount] = useState<number>(0);
+    const [mcpEnabled, setMcpEnabled] = useState(false);
+
+    useEffect(() => {
+      const checkMcpStatus = async () => {
+        const enabled = await isMcpEnabled();
+        setMcpEnabled(enabled);
+        if (enabled) {
+          const count = await getAvailableClientsCount();
+          setCount(count);
+        }
+      };
+      checkMcpStatus();
+    }, []);
+
+    if (!mcpEnabled) return null;
+
+    return (
+      <ChatAction
+        onClick={() => navigate(Path.McpMarket)}
+        text={`MCP${count ? ` (${count})` : ""}`}
+        icon={<McpToolIcon />}
+      />
+    );
+  };
+
+  // 在 _Chat 组件内添加新状态
+  const [editingFile, setEditingFile] = useState<FileInfo | null>(null);
+  const [showFileEditModal, setShowFileEditModal] = useState(false);
+
+  // 在_Chat组件中添加状态
+  const [editingImage, setEditingImage] = useState<string | null>(null);
+
+  // 在_Chat组件中添加状态，记录当前编辑图片所属的消息ID
+  const [editingImageMessageId, setEditingImageMessageId] = useState<
+    string | null
+  >(null);
+
   return (
     <div
       className={styles.chat}
@@ -2106,6 +2152,63 @@ function _Chat() {
                           </div>
                         )}
 
+                      <div className={styles["chat-message-item"]}>
+                        <Markdown
+                          key={message.streaming ? "loading" : "done"}
+                          content={getMessageTextContent(message)}
+                          loading={
+                            (message.preview || message.streaming) &&
+                            message.content.length === 0 &&
+                            !isUser
+                          }
+                          fontSize={fontSize}
+                          fontFamily={fontFamily}
+                          parentRef={scrollRef}
+                          defaultShow={i >= messages.length - 6}
+                          isUser={isUser}
+                          messageId={message.id}
+                        />
+                        {getMessageImages(message).length == 1 && (
+                          <img
+                            className={styles["chat-message-item-image"]}
+                            src={getMessageImages(message)[0]}
+                            alt=""
+                            onClick={() => {
+                              setEditingImage(getMessageImages(message)[0]);
+                              setEditingImageMessageId(message.id); // 保存图片所属的消息ID
+                            }}
+                          />
+                        )}
+                        {getMessageImages(message).length > 1 && (
+                          <div
+                            className={styles["chat-message-item-images"]}
+                            style={
+                              {
+                                "--image-count":
+                                  getMessageImages(message).length,
+                              } as React.CSSProperties
+                            }
+                          >
+                            {getMessageImages(message).map((image, index) => {
+                              return (
+                                <img
+                                  className={
+                                    styles["chat-message-item-image-multi"]
+                                  }
+                                  key={index}
+                                  src={image}
+                                  alt=""
+                                  onClick={() => {
+                                    setEditingImage(image);
+                                    setEditingImageMessageId(message.id); // 保存图片所属的消息ID
+                                  }}
+                                />
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
                   {showActions && (
                         <div
                           className={styles["chat-message-actions"]}
@@ -2320,10 +2423,12 @@ function _Chat() {
                       key={`img-${index}`}
                       className={styles["attach-image"]}
                       style={{ backgroundImage: `url("${image}")` }}
+                      onClick={() => setEditingImage(image)}
                     >
                       <div className={styles["attach-image-mask"]}>
                         <DeleteImageButton
-                          deleteImage={() => {
+                          deleteImage={(e) => {
+                            e.stopPropagation(); // 防止触发图片点击事件
                             setAttachImages(
                               attachImages.filter((_, i) => i !== index),
                             );
@@ -2338,6 +2443,34 @@ function _Chat() {
                     <div
                       key={`file-${index}`}
                       className={styles["attach-file"]}
+                      onClick={async () => {
+                        // 使用与消息编辑相同的showPrompt函数
+                        const newContent = await showPrompt(
+                          `编辑文件：${file.name}`,
+                          file.content,
+                          20, // 更多行数以便于编辑文件内容
+                        );
+
+                        if (newContent) {
+                          // 更新文件内容
+                          const updatedFiles = attachedFiles.map((f, i) => {
+                            if (i === index) {
+                              // 更新文件大小
+                              const newSize = new Blob([newContent]).size;
+                              return {
+                                ...f,
+                                content: newContent,
+                                size: newSize,
+                                originalFile: new File([newContent], f.name, {
+                                  type: f.type,
+                                }),
+                              };
+                            }
+                            return f;
+                          });
+                          setAttachedFiles(updatedFiles);
+                        }
+                      }}
                     >
                       <div className={styles["attach-file-card"]}>
                         <div
@@ -2359,7 +2492,10 @@ function _Chat() {
                       </div>
                       <div className={styles["attach-image-mask"]}>
                         <DeleteImageButton
-                          deleteImage={() => deleteAttachedFile(index)}
+                          deleteImage={(e) => {
+                            e.stopPropagation(); // 防止触发文件点击事件
+                            deleteAttachedFile(index);
+                          }}
                         />
                       </div>
                     </div>
@@ -2409,6 +2545,137 @@ function _Chat() {
 
       {showShortcutKeyModal && (
         <ShortcutKeyModal onClose={() => setShowShortcutKeyModal(false)} />
+      )}
+
+      {showFileEditModal && editingFile && (
+        <div className="modal-mask">
+          <Modal
+            title={`编辑文件内容: ${editingFile.name}`}
+            onClose={() => setShowFileEditModal(false)}
+            actions={[
+              <IconButton
+                text={Locale.UI.Cancel}
+                icon={<CancelIcon />}
+                key="cancel"
+                onClick={() => {
+                  setShowFileEditModal(false);
+                }}
+              />,
+              <IconButton
+                type="primary"
+                text={Locale.UI.Confirm}
+                icon={<ConfirmIcon />}
+                key="ok"
+                onClick={() => {
+                  // 保存编辑后的内容
+                  const updatedFiles = attachedFiles.map((file) => {
+                    if (file === editingFile) {
+                      // 更新文件大小
+                      const newSize = new Blob([editingFile.content]).size;
+                      return {
+                        ...file,
+                        size: newSize,
+                        originalFile: new File(
+                          [editingFile.content],
+                          file.name,
+                          { type: file.type },
+                        ),
+                      };
+                    }
+                    return file;
+                  });
+                  setAttachedFiles(updatedFiles);
+                  setShowFileEditModal(false);
+                }}
+              />,
+            ]}
+          >
+            <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
+              <textarea
+                style={{
+                  width: "100%",
+                  height: "300px",
+                  padding: "8px",
+                  fontFamily: "monospace",
+                  fontSize: "14px",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  resize: "vertical",
+                }}
+                value={editingFile.content}
+                onChange={(e) => {
+                  // 更新正在编辑的文件内容
+                  setEditingFile({
+                    ...editingFile,
+                    content: e.target.value,
+                  });
+                }}
+              />
+            </div>
+          </Modal>
+        </div>
+      )}
+
+      {editingImage && (
+        <ImageEditor
+          imageUrl={editingImage}
+          onClose={() => {
+            setEditingImage(null);
+            setEditingImageMessageId(null); // 清除消息ID
+          }}
+          onSave={(editedImage) => {
+            // 检查是否为附件图片
+            if (attachImages.includes(editingImage)) {
+              setAttachImages(
+                attachImages.map((img) =>
+                  img === editingImage ? editedImage : img,
+                ),
+              );
+            }
+            // 检查是否为消息中的图片
+            else if (editingImageMessageId) {
+              // 更新消息中的图片
+              chatStore.updateTargetSession(session, (session) => {
+                // 查找所有消息(包括上下文消息)
+                const messages = session.mask.context.concat(session.messages);
+                const messageToUpdate = messages.find(
+                  (m) => m.id === editingImageMessageId,
+                );
+
+                if (messageToUpdate) {
+                  // 处理两种可能的消息内容格式
+                  if (typeof messageToUpdate.content === "string") {
+                    // 文本消息内容 - 不应该有图片，但为防止错误进行处理
+                    messageToUpdate.content = messageToUpdate.content;
+                  } else if (Array.isArray(messageToUpdate.content)) {
+                    // 多模态内容 - 找到并替换图片URL
+                    messageToUpdate.content = messageToUpdate.content.map(
+                      (item) => {
+                        if (
+                          item.type === "image_url" &&
+                          item.image_url &&
+                          item.image_url.url === editingImage
+                        ) {
+                          return {
+                            ...item,
+                            image_url: {
+                              ...item.image_url,
+                              url: editedImage,
+                            },
+                          };
+                        }
+                        return item;
+                      },
+                    );
+                  }
+                }
+              });
+            }
+
+            setEditingImage(null);
+            setEditingImageMessageId(null); // 清除消息ID
+          }}
+        />
       )}
     </div>
   );

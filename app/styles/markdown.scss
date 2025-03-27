@@ -1248,3 +1248,17 @@ summary,
 #dmermaid {
   display: none;
 }
+
+.markdown-body-container {
+  position: relative;
+  width: 100%;
+  
+  .token-info {
+    font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+    transition: opacity 0.3s ease;
+    
+    &:hover {
+      opacity: 1 !important;
+    }
+  }
+}

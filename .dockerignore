@@ -99,3 +99,4 @@ Thumbs.db
 *.key.pub
 
 build.sh
+cicd.sh
