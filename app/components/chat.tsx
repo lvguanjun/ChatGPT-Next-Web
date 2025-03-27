@@ -2152,6 +2152,62 @@ function _Chat() {
                           </div>
                         )}
 
+                        {showActions && (
+                            <div
+                              className={styles["chat-message-actions"]}
+                              style={{ marginTop: "8px" }}
+                            >
+                              <div className={styles["chat-input-actions"]}>
+                                <>
+                                  <ChatAction
+                                    text={Locale.Chat.Actions.Retry}
+                                    icon={<ResetIcon />}
+                                    onClick={() => onResend(message)}
+                                  />
+                                  <ChatAction
+                                    text={Locale.Chat.Actions.Delete}
+                                    icon={<DeleteIcon />}
+                                    onClick={() => onDelete(message.id ?? i)}
+                                  />
+                                  <ChatAction
+                                    text={Locale.Chat.Actions.Pin}
+                                    icon={<PinIcon />}
+                                    onClick={() => onPinMessage(message)}
+                                  />
+                                  <ChatAction
+                                    text={Locale.Chat.Actions.Copy}
+                                    icon={<CopyIcon />}
+                                    onClick={() =>
+                                      copyToClipboard(
+                                        getMessageTextContent(message),
+                                      )
+                                    }
+                                  />
+                                  {config.ttsConfig.enable && (
+                                    <ChatAction
+                                      text={
+                                        speechStatus
+                                          ? Locale.Chat.Actions.StopSpeech
+                                          : Locale.Chat.Actions.Speech
+                                      }
+                                      icon={
+                                        speechStatus ? (
+                                          <SpeakStopIcon />
+                                        ) : (
+                                          <SpeakIcon />
+                                        )
+                                      }
+                                      onClick={() =>
+                                        openaiSpeech(getMessageTextContent(message))
+                                      }
+                                    />
+                                  )}
+                                </>
+                              </div>
+                            </div>
+                          )}
+                      </div>
+
                       <div className={styles["chat-message-item"]}>
                         <Markdown
                           key={message.streaming ? "loading" : "done"}
@@ -2209,145 +2265,6 @@ function _Chat() {
                         )}
                       </div>
 
-                  {showActions && (
-                        <div
-                          className={styles["chat-message-actions"]}
-                          style={{ marginTop: "8px" }}
-                        >
-                          <div className={styles["chat-input-actions"]}>
-                            <>
-                              <ChatAction
-                                text={Locale.Chat.Actions.Retry}
-                                icon={<ResetIcon />}
-                                onClick={() => onResend(message)}
-                              />
-                              <ChatAction
-                                text={Locale.Chat.Actions.Delete}
-                                icon={<DeleteIcon />}
-                                onClick={() => onDelete(message.id ?? i)}
-                              />
-                              <ChatAction
-                                text={Locale.Chat.Actions.Pin}
-                                icon={<PinIcon />}
-                                onClick={() => onPinMessage(message)}
-                              />
-                              <ChatAction
-                                text={Locale.Chat.Actions.Copy}
-                                icon={<CopyIcon />}
-                                onClick={() =>
-                                  copyToClipboard(
-                                    getMessageTextContent(message),
-                                  )
-                                }
-                              />
-                              {config.ttsConfig.enable && (
-                                <ChatAction
-                                  text={
-                                    speechStatus
-                                      ? Locale.Chat.Actions.StopSpeech
-                                      : Locale.Chat.Actions.Speech
-                                  }
-                                  icon={
-                                    speechStatus ? (
-                                      <SpeakStopIcon />
-                                    ) : (
-                                      <SpeakIcon />
-                                    )
-                                  }
-                                  onClick={() =>
-                                    openaiSpeech(getMessageTextContent(message))
-                                  }
-                                />
-                              )}
-                            </>
-                          </div>
-                        </div>
-                      )}
-                      </div>
-                      {message?.tools?.length == 0 && showTyping && (
-                          <div className={styles["chat-message-status"]}>
-                            {Locale.Chat.Typing}
-                          </div>
-                        )}
-                        {/*@ts-ignore*/}
-                        {message?.tools?.length > 0 && (
-                          <div className={styles["chat-message-tools"]}>
-                            {message?.tools?.map((tool) => (
-                              <div
-                                key={tool.id}
-                                title={tool?.errorMsg}
-                                className={styles["chat-message-tool"]}
-                              >
-                                {tool.isError === false ? (
-                                  <ConfirmIcon />
-                                ) : tool.isError === true ? (
-                                  <CloseIcon />
-                                ) : (
-                                  <LoadingButtonIcon />
-                                )}
-                                <span>{tool?.function?.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      <div className={styles["chat-message-item"]}>
-                        <Markdown
-                          key={message.streaming ? "loading" : "done"}
-                          content={getMessageTextContent(message)}
-                          loading={
-                            (message.preview || message.streaming) &&
-                            message.content.length === 0 &&
-                            !isUser
-                          }
-                          fontSize={fontSize}
-                          fontFamily={fontFamily}
-                          parentRef={scrollRef}
-                          defaultShow={i >= messages.length - 6}
-                        />
-                        {getMessageImages(message).length == 1 && (
-                          <img
-                            className={styles["chat-message-item-image"]}
-                            src={getMessageImages(message)[0]}
-                            alt=""
-                          />
-                        )}
-                        {getMessageImages(message).length > 1 && (
-                          <div
-                            className={styles["chat-message-item-images"]}
-                            style={
-                              {
-                                "--image-count":
-                                  getMessageImages(message).length,
-                              } as React.CSSProperties
-                            }
-                          >
-                            {getMessageImages(message).map((image, index) => {
-                              return (
-                                <img
-                                  className={
-                                    styles["chat-message-item-image-multi"]
-                                  }
-                                  key={index}
-                                  src={image}
-                                  alt=""
-                                />
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                      {message?.audio_url && (
-                          <div className={styles["chat-message-audio"]}>
-                            <audio src={message.audio_url} controls />
-                          </div>
-                        )}
-                      <div className={styles["chat-message-action-date"]}>
-                          {isContext
-                            ? Locale.Chat.IsContext
-                            : message.role === "system"
-                            ? message.date.toLocaleString()
-                            : ""}
-                        </div>
                     </div>
                   </div>
                   {shouldShowClearContextDivider && <ClearContextDivider />}
