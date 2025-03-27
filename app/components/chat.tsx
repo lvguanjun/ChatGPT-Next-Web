@@ -1059,7 +1059,7 @@ function _Chat() {
   // only search prompts when user input is short
   const SEARCH_TEXT_LIMIT = 30;
   const onInput = (text: string) => {
-    const MAX_TEXT_LENGTH = 3000; // 最大文本长度
+    const MAX_TEXT_LENGTH = 50000; // 最大文本长度
 
     // 修改输入文本处理逻辑
     if (text.length > MAX_TEXT_LENGTH && userInput.length <= MAX_TEXT_LENGTH) {
@@ -1122,7 +1122,7 @@ function _Chat() {
 
     // 检查是否有长文本需要转换为文件
     let finalUserInput = userInput;
-    const MAX_TEXT_LENGTH = 3000; // 最大文本长度
+    const MAX_TEXT_LENGTH = 50000; // 最大文本长度
 
     if (userInput.length > MAX_TEXT_LENGTH) {
       // 将长文本转换为文件附件
