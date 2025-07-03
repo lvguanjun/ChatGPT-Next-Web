@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 
 import styles from "./settings.module.scss";
 
@@ -82,6 +82,7 @@ import { ProviderType } from "../utils/cloud";
 import { TTSConfigList } from "./tts-config";
 import { RealtimeConfigList } from "./realtime-chat/realtime-config";
 import { ModelSelectorModal } from "./model-selector-modal";
+import { getModelCategory } from "./emoji"
 
 function EditPromptModal(props: { id: string; onClose: () => void }) {
   const promptStore = usePromptStore();
@@ -575,24 +576,57 @@ function SyncItems() {
 }
 
 // 添加一个函数来从服务端获取 CUSTOM_MODELS 环境变量
-function useServerCustomModels() {
+export function useServerCustomModels() {
   const [serverCustomModels, setServerCustomModels] = useState("");
   const config = useAppConfig();
+  const accessStore = useAccessStore();
+
+  const fetchModels = useCallback(async () => {
+    try {
+      // 复用model-selector-modal的获取逻辑
+      const configResponse = await fetch("/api/config");
+      const configData = await configResponse.json();
+
+      const baseUrl = configData.baseUrl;
+
+      const response = await fetch("/api/proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: `${baseUrl}/v1/models`,
+        }),
+      });
+
+      const data = await response.json();
+
+      // 处理分类并生成模型字符串
+      let categorizedModels = "";
+      if (data.data && Array.isArray(data.data)) {
+        categorizedModels = data.data
+          .map((model: any) => {
+            const category = getModelCategory(model.id);
+            return `${model.id}@${category}`;
+          })
+          .join(",");
+      }
+
+      let finalModels = categorizedModels;
+
+      if (categorizedModels && !categorizedModels.includes("-all")) {
+        // 只要有选中的模型，就添加-all前缀
+        finalModels = "-all," + categorizedModels;
+      }
+
+      config.update(c => c.customModels = finalModels);
+      setServerCustomModels(finalModels);
+
+    } catch (err) {
+      console.error("Failed to fetch models:", err);
+    }
+  }, [accessStore, config]);
 
   useEffect(() => {
-    // 从服务端获取 CUSTOM_MODELS 环境变量
-    fetch("/api/config")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.customModels && !config.customModels) {
-          // 只有当客户端没有设置自定义模型时，才使用服务端的设置
-          config.update((config) => (config.customModels = data.customModels));
-          setServerCustomModels(data.customModels);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to fetch server custom models:", err);
-      });
+    fetchModels();
   }, []);
 
   return serverCustomModels;
