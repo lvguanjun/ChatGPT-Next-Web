@@ -178,6 +178,11 @@ export function ModelSelectorModal(props: {
     setLoading(true);
 
     try {
+      // 强制刷新时清除本地缓存
+      if (forceRefresh) {
+        localStorage.removeItem(MODELS_STORAGE_KEY);
+      }
+
       // 尝试从本地存储加载模型列表
       const storedModels = localStorage.getItem(MODELS_STORAGE_KEY);
 
@@ -347,9 +352,10 @@ export function ModelSelectorModal(props: {
 
           if (data.data && Array.isArray(data.data)) {
             // 处理模型数据
+            // 强制全选并清除自定义模型
             apiModelList = data.data.map((model: any) => ({
               id: model.id,
-              selected: currentModelList.includes(model.id),
+              selected: true,
             }));
 
             // 按字母顺序排序
@@ -358,20 +364,20 @@ export function ModelSelectorModal(props: {
             );
 
             // 找出自定义模型名中已有的但不在API返回列表中的模型
-            const apiModelIds = apiModelList.map((m: ModelInfo) => m.id);
-            const customModels = currentModelList
-              .filter(
-                (modelId) =>
-                  !apiModelIds.includes(modelId) && modelId !== "-all",
-              )
-              .map((modelId) => ({
-                id: modelId,
-                selected: true,
-                isCustom: true,
-              }));
+            // const apiModelIds = apiModelList.map((m: ModelInfo) => m.id);
+            // const customModels = currentModelList
+            //   .filter(
+            //     (modelId) =>
+            //       !apiModelIds.includes(modelId) && modelId !== "-all",
+            //   )
+            //   .map((modelId) => ({
+            //     id: modelId,
+            //     selected: true,
+            //     isCustom: true,
+            //   }));
 
-            // 合并API模型和自定义模型
-            const allModels = [...apiModelList, ...customModels];
+            // 只保留API模型
+            const allModels = [...apiModelList];
             setModels(allModels);
 
             // 保存到本地存储
@@ -412,7 +418,7 @@ export function ModelSelectorModal(props: {
   };
 
   useEffect(() => {
-    fetchModels(false); // 传入false表示优先从本地加载
+    fetchModels(true); // 传入true表示优先从服务端加载
   }, [accessStore.useCustomConfig]);
 
   const toggleModelSelection = (originalIndex: number) => {
