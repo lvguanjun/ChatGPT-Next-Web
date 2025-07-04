@@ -112,7 +112,7 @@ export const DEFAULT_CONFIG: AppConfig = {
     providerName: "OpenAI" as ServiceProvider,
     temperature: 0.5,
     top_p: 1,
-    max_tokens: 32767, // I don't even know how much 2^15 is, I must be a terrible programmer. :(
+    max_tokens: 16384,
     presence_penalty: 0,
     frequency_penalty: 0,
     sendMemory: false,
